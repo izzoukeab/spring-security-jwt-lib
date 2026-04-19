@@ -107,6 +107,51 @@ public class JwtTokenProvider {
     }
 
     /**
+     * Extracts the subject (email) from a token.
+     *
+     * @param token raw JWT string
+     * @return email
+     */
+    public String getEmail(final String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    /**
+     * Extracts the userId claim.
+     *
+     * @param token raw JWT string
+     * @return userId
+     */
+    public String getUserId(final String token) {
+        return parseClaims(token).get(CLAIM_USER_ID, String.class);
+    }
+
+    /**
+     * Extracts the permissions claim.
+     *
+     * @param token raw JWT string
+     * @return list of permission names
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> getPermissions(final String token) {
+        Object raw = parseClaims(token).get(CLAIM_PERMISSIONS);
+        if (raw instanceof List<?> list) {
+            return (List<String>) list;
+        }
+        return List.of();
+    }
+
+    /**
+     * Extracts the JWT ID (jti) claim — used as refresh token identifier.
+     *
+     * @param token raw JWT string
+     * @return jti value
+     */
+    public String getJwtId(final String token) {
+        return parseClaims(token).getId();
+    }
+
+    /**
      * Builds and signs a JWT.
      *
      * @param userId      user identifier claim value
