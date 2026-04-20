@@ -1,10 +1,8 @@
 package io.javloom.security.auth.passwordless;
 
-import io.javloom.commons.exception.ApiException;
-import io.javloom.commons.exception.ExceptionName;
+import io.javloom.security.exception.JwtSecurityException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -45,23 +43,15 @@ public class OtpService {
      *
      * @param phone E.164 phone number
      * @param code  submitted OTP code
-     * @throws ApiException if the code is invalid or expired
+     * @throws JwtSecurityException if the code is invalid or expired
      */
     public void verifyOtp(final String phone, final String code) {
         String stored = otpStore.find(phone)
-                .orElseThrow(() -> ApiException.of(
-                        HttpStatus.UNAUTHORIZED,
-                        "OTP expired or not found",
-                        ExceptionName.UnauthorizedException
-                ));
+                .orElseThrow(() -> JwtSecurityException.unauthorized("OTP expired or not found"));
 
         if (!stored.equals(code)) {
             log.warn("Invalid OTP attempt for phone: {}", maskPhone(phone));
-            throw ApiException.of(
-                    HttpStatus.UNAUTHORIZED,
-                    "Invalid OTP code",
-                    ExceptionName.UnauthorizedException
-            );
+            throw JwtSecurityException.unauthorized("Invalid OTP code");
         }
 
         otpStore.delete(phone);

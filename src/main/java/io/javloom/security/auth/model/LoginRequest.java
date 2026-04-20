@@ -1,6 +1,5 @@
 package io.javloom.security.auth.model;
 
-import io.javloom.commons.validation.annotation.NoHtml;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -18,7 +17,6 @@ public class LoginRequest {
      */
     @Email
     @NotBlank
-    @NoHtml
     private String email;
 
     /**

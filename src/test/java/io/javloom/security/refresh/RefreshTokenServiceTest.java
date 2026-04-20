@@ -1,7 +1,7 @@
 package io.javloom.security.refresh;
 
-import io.javloom.commons.exception.ApiException;
 import io.javloom.security.config.JwtProperties;
+import io.javloom.security.exception.JwtSecurityException;
 import io.javloom.security.token.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,7 +87,7 @@ class RefreshTokenServiceTest {
         when(store.findActiveByHash(hash)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.rotate(rawToken))
-                .isInstanceOf(ApiException.class)
+                .isInstanceOf(JwtSecurityException.class)
                 .hasMessageContaining("invalid or expired");
     }
 
@@ -112,7 +112,7 @@ class RefreshTokenServiceTest {
         when(store.findByHash(hash)).thenReturn(Optional.of(revoked));
 
         assertThatThrownBy(() -> service.rotate(rawToken))
-                .isInstanceOf(ApiException.class)
+                .isInstanceOf(JwtSecurityException.class)
                 .hasMessageContaining("reuse detected");
 
         verify(store).revokeAllByFamilyId("family-1");

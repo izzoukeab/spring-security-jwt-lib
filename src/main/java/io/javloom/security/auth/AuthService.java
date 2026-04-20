@@ -1,9 +1,8 @@
 package io.javloom.security.auth;
 
-import io.javloom.commons.exception.ApiException;
-import io.javloom.commons.exception.ExceptionName;
 import io.javloom.security.auth.model.AuthResponse;
 import io.javloom.security.auth.passwordless.OtpService;
+import io.javloom.security.exception.JwtSecurityException;
 import io.javloom.security.refresh.RefreshTokenService;
 import io.javloom.security.token.JwtTokenProvider;
 import io.javloom.security.token.TokenPair;
@@ -12,7 +11,6 @@ import io.javloom.security.user.SecurityUser;
 import io.javloom.security.user.SecurityUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,14 +37,14 @@ public class AuthService {
      * @param email    user email
      * @param password raw password
      * @return auth response with token pair and user info
-     * @throws ApiException if credentials are invalid
+     * @throws JwtSecurityException if credentials are invalid
      */
     public AuthResponse login(final String email, final String password) {
-        SecurityUser user = userService.findByEmail(email).orElseThrow(ApiException::unauthorized);
+        SecurityUser user = userService.findByEmail(email).orElseThrow(JwtSecurityException::unauthorized);
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             log.warn("Failed login attempt for email: {}", email);
-            throw ApiException.unauthorized();
+            throw JwtSecurityException.unauthorized();
         }
 
         return buildAuthResponse(user);
@@ -74,7 +72,7 @@ public class AuthService {
     public AuthResponse verifyOtpLogin(final String phone, final String code) {
         otpService.verifyOtp(phone, code);
 
-        SecurityUser user = userService.findByPhone(phone).orElseThrow(ApiException::unauthorized);
+        SecurityUser user = userService.findByPhone(phone).orElseThrow(JwtSecurityException::unauthorized);
 
         return buildAuthResponse(user);
     }
@@ -86,25 +84,17 @@ public class AuthService {
      *
      * @param refreshToken current raw refresh token
      * @return new auth response with rotated token pair
-     * @throws ApiException if refresh token is invalid or reuse is detected
+     * @throws JwtSecurityException if refresh token is invalid or reuse is detected
      */
     public AuthResponse refresh(final String refreshToken) {
         if (!tokenProvider.isValid(refreshToken, TokenType.REFRESH)) {
-            throw ApiException.of(
-                    HttpStatus.UNAUTHORIZED,
-                    "Invalid refresh token",
-                    ExceptionName.UnauthorizedException
-            );
+            throw JwtSecurityException.unauthorized("Invalid refresh token");
         }
 
         String email = tokenProvider.getEmail(refreshToken);
 
         SecurityUser user = userService.findByEmail(email)
-                .orElseThrow(() -> ApiException.of(
-                        HttpStatus.UNAUTHORIZED,
-                        "User not found",
-                        ExceptionName.UnauthorizedException
-                ));
+                .orElseThrow(() -> JwtSecurityException.unauthorized("User not found"));
 
         String newRefreshToken = refreshTokenService.rotate(refreshToken);
         String newAccessToken = tokenProvider.generateAccessToken(

@@ -1,6 +1,6 @@
 package io.javloom.security.auth.passwordless;
 
-import io.javloom.commons.exception.ApiException;
+import io.javloom.security.exception.JwtSecurityException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +53,7 @@ class OtpServiceTest {
         when(otpStore.find("+33612345678")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> otpService.verifyOtp("+33612345678", "123456"))
-                .isInstanceOf(ApiException.class)
+                .isInstanceOf(JwtSecurityException.class)
                 .hasMessageContaining("expired or not found");
     }
 
@@ -62,7 +62,7 @@ class OtpServiceTest {
         when(otpStore.find("+33612345678")).thenReturn(Optional.of("123456"));
 
         assertThatThrownBy(() -> otpService.verifyOtp("+33612345678", "999999"))
-                .isInstanceOf(ApiException.class)
+                .isInstanceOf(JwtSecurityException.class)
                 .hasMessageContaining("Invalid OTP");
     }
 
@@ -71,6 +71,6 @@ class OtpServiceTest {
         when(otpStore.find("+33612345678")).thenReturn(Optional.of("123456"));
 
         assertThatThrownBy(() -> otpService.verifyOtp("+33612345678", "000000"))
-                .isInstanceOf(ApiException.class);
+                .isInstanceOf(JwtSecurityException.class);
     }
 }

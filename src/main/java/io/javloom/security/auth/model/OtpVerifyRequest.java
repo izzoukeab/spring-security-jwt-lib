@@ -1,6 +1,5 @@
 package io.javloom.security.auth.model;
 
-import io.javloom.commons.validation.annotation.NoHtml;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -18,7 +17,6 @@ public class OtpVerifyRequest {
      * E.164 formatted phone number — must match the number used in {@link OtpRequest}.
      */
     @NotBlank
-    @NoHtml
     @Pattern(
             regexp = "^\\+[1-9]\\d{6,14}$",
             message = "must be a valid E.164 phone number")

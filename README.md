@@ -94,20 +94,6 @@ Add the dependency to your app:
 </dependency>
 ```
 
-⚠️ This library depends on `spring-rest-commons`:
-
-- https://github.com/izzoukeab/spring-rest-commons
-
-If you use library-thrown `ApiException`, include:
-
-```xml
-<dependency>
-  <groupId>io.javloom</groupId>
-  <artifactId>spring-rest-commons</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-</dependency>
-```
-
 ## ⚙️ Configuration
 
 `application.yml`:

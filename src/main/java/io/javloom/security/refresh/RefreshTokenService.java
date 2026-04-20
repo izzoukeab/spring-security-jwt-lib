@@ -1,12 +1,10 @@
 package io.javloom.security.refresh;
 
-import io.javloom.commons.exception.ApiException;
-import io.javloom.commons.exception.ExceptionName;
 import io.javloom.security.config.JwtProperties;
+import io.javloom.security.exception.JwtSecurityException;
 import io.javloom.security.token.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -62,7 +60,7 @@ public class RefreshTokenService {
      *
      * @param rawToken current raw refresh token JWT
      * @return new raw refresh token JWT
-     * @throws ApiException on invalid, expired, or reused token
+     * @throws JwtSecurityException on invalid, expired, or reused token
      */
     public String rotate(final String rawToken) {
         String tokenHash = hash(rawToken);
@@ -72,20 +70,12 @@ public class RefreshTokenService {
             if (existing.isRevoked()) {
                 log.warn("Refresh token reuse detected — revoking family: {}", existing.getFamilyId());
                 store.revokeAllByFamilyId(existing.getFamilyId());
-                throw ApiException.of(
-                        HttpStatus.UNAUTHORIZED,
-                        "Refresh token reuse detected — all sessions revoked",
-                        ExceptionName.UnauthorizedException
-                );
+                throw JwtSecurityException.unauthorized("Refresh token reuse detected — all sessions revoked");
             }
         });
 
         RefreshToken current = store.findActiveByHash(tokenHash)
-                .orElseThrow(() -> ApiException.of(
-                        HttpStatus.UNAUTHORIZED,
-                        "Refresh token is invalid or expired",
-                        ExceptionName.UnauthorizedException
-                ));
+                .orElseThrow(() -> JwtSecurityException.unauthorized("Refresh token is invalid or expired"));
 
         // Revoke current token
         store.revokeById(current.getId());
@@ -134,11 +124,7 @@ public class RefreshTokenService {
             byte[] hashBytes = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hashBytes);
         } catch (NoSuchAlgorithmException ex) {
-            throw ApiException.of(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "SHA-256 algorithm not available",
-                    ExceptionName.InternalServerErrorException
-            );
+            throw JwtSecurityException.internalServerError("SHA-256 algorithm not available");
         }
     }
 }
