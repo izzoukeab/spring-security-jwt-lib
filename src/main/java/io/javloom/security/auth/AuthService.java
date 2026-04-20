@@ -42,20 +42,11 @@ public class AuthService {
      * @throws ApiException if credentials are invalid
      */
     public AuthResponse login(final String email, final String password) {
-        SecurityUser user = userService.findByEmail(email)
-                .orElseThrow(() -> ApiException.of(
-                        HttpStatus.UNAUTHORIZED,
-                        ExceptionName.UnauthorizedException,
-                        "Invalid credentials"
-                ));
+        SecurityUser user = userService.findByEmail(email).orElseThrow(ApiException::unauthorized);
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             log.warn("Failed login attempt for email: {}", email);
-            throw ApiException.of(
-                    HttpStatus.UNAUTHORIZED,
-                    ExceptionName.UnauthorizedException,
-                    "Invalid credentials"
-            );
+            throw ApiException.unauthorized();
         }
 
         return buildAuthResponse(user);
@@ -83,12 +74,7 @@ public class AuthService {
     public AuthResponse verifyOtpLogin(final String phone, final String code) {
         otpService.verifyOtp(phone, code);
 
-        SecurityUser user = userService.findByPhone(phone)
-                .orElseThrow(() -> ApiException.of(
-                        HttpStatus.UNAUTHORIZED,
-                        ExceptionName.UnauthorizedException,
-                        "User not found for phone number"
-                ));
+        SecurityUser user = userService.findByPhone(phone).orElseThrow(ApiException::unauthorized);
 
         return buildAuthResponse(user);
     }
@@ -106,8 +92,8 @@ public class AuthService {
         if (!tokenProvider.isValid(refreshToken, TokenType.REFRESH)) {
             throw ApiException.of(
                     HttpStatus.UNAUTHORIZED,
-                    ExceptionName.UnauthorizedException,
-                    "Invalid refresh token"
+                    "Invalid refresh token",
+                    ExceptionName.UnauthorizedException
             );
         }
 
@@ -116,8 +102,8 @@ public class AuthService {
         SecurityUser user = userService.findByEmail(email)
                 .orElseThrow(() -> ApiException.of(
                         HttpStatus.UNAUTHORIZED,
-                        ExceptionName.UnauthorizedException,
-                        "User not found"
+                        "User not found",
+                        ExceptionName.UnauthorizedException
                 ));
 
         String newRefreshToken = refreshTokenService.rotate(refreshToken);

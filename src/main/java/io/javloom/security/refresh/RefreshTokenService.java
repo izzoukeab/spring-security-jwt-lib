@@ -74,8 +74,8 @@ public class RefreshTokenService {
                 store.revokeAllByFamilyId(existing.getFamilyId());
                 throw ApiException.of(
                         HttpStatus.UNAUTHORIZED,
-                        ExceptionName.UnauthorizedException,
-                        "Refresh token reuse detected — all sessions revoked"
+                        "Refresh token reuse detected — all sessions revoked",
+                        ExceptionName.UnauthorizedException
                 );
             }
         });
@@ -83,8 +83,8 @@ public class RefreshTokenService {
         RefreshToken current = store.findActiveByHash(tokenHash)
                 .orElseThrow(() -> ApiException.of(
                         HttpStatus.UNAUTHORIZED,
-                        ExceptionName.UnauthorizedException,
-                        "Refresh token is invalid or expired"
+                        "Refresh token is invalid or expired",
+                        ExceptionName.UnauthorizedException
                 ));
 
         // Revoke current token
@@ -136,8 +136,8 @@ public class RefreshTokenService {
         } catch (NoSuchAlgorithmException ex) {
             throw ApiException.of(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    ExceptionName.InternalServerErrorException,
-                    "SHA-256 algorithm not available"
+                    "SHA-256 algorithm not available",
+                    ExceptionName.InternalServerErrorException
             );
         }
     }

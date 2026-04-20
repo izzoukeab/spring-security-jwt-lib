@@ -94,6 +94,10 @@ Add the dependency to your app:
 </dependency>
 ```
 
+⚠️ This library depends on `spring-rest-commons`:
+
+- https://github.com/izzoukeab/spring-rest-commons
+
 If you use library-thrown `ApiException`, include:
 
 ```xml

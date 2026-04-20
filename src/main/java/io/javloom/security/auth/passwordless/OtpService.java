@@ -51,16 +51,16 @@ public class OtpService {
         String stored = otpStore.find(phone)
                 .orElseThrow(() -> ApiException.of(
                         HttpStatus.UNAUTHORIZED,
-                        ExceptionName.UnauthorizedException,
-                        "OTP expired or not found"
+                        "OTP expired or not found",
+                        ExceptionName.UnauthorizedException
                 ));
 
         if (!stored.equals(code)) {
             log.warn("Invalid OTP attempt for phone: {}", maskPhone(phone));
             throw ApiException.of(
                     HttpStatus.UNAUTHORIZED,
-                    ExceptionName.UnauthorizedException,
-                    "Invalid OTP code"
+                    "Invalid OTP code",
+                    ExceptionName.UnauthorizedException
             );
         }
 
