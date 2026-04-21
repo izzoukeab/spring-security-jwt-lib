@@ -21,6 +21,7 @@ You get:
 - [📦 Installation](#-installation)
 - [⚙️ Configuration](#-configuration)
 - [🛠️ Integration guide](#integration-guide)
+- [🔑 PasswordEncoder override](#passwordencoder-override)
 - [🚀 Usage examples](#-usage-examples)
 - [🔐 Permissions and authorization](#-permissions-and-authorization)
 - [🧩 Contracts you must implement](#-contracts-you-must-implement)
@@ -123,7 +124,12 @@ javloom:
 
 ### 1) Register configuration
 
-`SecurityAutoConfiguration` exists in the library. If your app does not pick it up automatically, import it manually:
+`SecurityAutoConfiguration` is auto-registered via Spring Boot's auto-configuration imports file:
+
+`src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
+
+So in a Spring Boot app, you usually do not need any manual `@Import`.
+If you are wiring components manually (non-standard setup), you can still import it explicitly:
 
 ```java
 @Configuration
@@ -171,6 +177,27 @@ public class SecurityConfig {
 ### 4) Expose your own API endpoints
 
 This library does not impose controllers. You define your REST endpoints and delegate to `AuthService`.
+
+<a id="passwordencoder-override"></a>
+
+## 🔑 PasswordEncoder override
+
+The library auto-registers a default `PasswordEncoder` only when your app does not provide one.
+If your app uses a different hash strategy, define your own bean and it will override the default safely.
+
+```java
+@Configuration
+public class PasswordConfig {
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        // Example: Argon2 for new hashes in this app.
+        return new org.springframework.security.crypto.argon2.Argon2PasswordEncoder();
+    }
+}
+```
+
+For mixed/legacy environments, prefer a delegating encoder with explicit ids (for example `{bcrypt}`, `{argon2}`, `{pbkdf2}` prefixes) so multiple formats can be verified during migration.
 
 ## 🚀 Usage examples
 

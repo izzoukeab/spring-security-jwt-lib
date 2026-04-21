@@ -67,7 +67,6 @@ public class AuthService {
      * @param phone E.164 phone number
      * @param code  submitted OTP code
      * @return auth response with token pair and user info
-     * @throws ApiException if OTP is invalid or user not found
      */
     public AuthResponse verifyOtpLogin(final String phone, final String code) {
         otpService.verifyOtp(phone, code);

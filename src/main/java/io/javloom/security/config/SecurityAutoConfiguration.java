@@ -6,11 +6,14 @@ import io.javloom.security.token.JwtTokenProvider;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Autoconfiguration for Javloom JWT security.
@@ -22,9 +25,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @RequiredArgsConstructor
 @EnableConfigurationProperties(JwtProperties.class)
 public class SecurityAutoConfiguration {
-
-    private final CustomPermissionEvaluator customPermissionEvaluator;
-
     /**
      * Registers the JWT token provider.
      */
@@ -56,6 +56,16 @@ public class SecurityAutoConfiguration {
     @Bean
     public CustomPermissionEvaluator customPermissionEvaluator() {
         return new CustomPermissionEvaluator();
+    }
+
+    /**
+     * Registers a safe default password encoder for email/password login.
+     * Consuming apps can override this bean with their own encoder.
+     */
+    @Bean
+    @ConditionalOnMissingBean(PasswordEncoder.class)
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }

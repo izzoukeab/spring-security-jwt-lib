@@ -14,7 +14,6 @@ import java.io.Serializable;
  * Used by Spring Security permission expressions.
  */
 @Slf4j
-@Component
 @Qualifier("customPermissionEvaluator")
 public class CustomPermissionEvaluator implements PermissionEvaluator {
 

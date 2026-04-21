@@ -20,6 +20,12 @@ public class SecurityUser implements UserDetails {
     /** User email used as the Spring Security username. */
     private final String email;
 
+    /**
+     * BCrypt-hashed password. Required for email/password login.
+     * May be {@code null} for passwordless-only users.
+     */
+    private final String password;
+
     /** Permission names mapped to granted authorities. */
     private final List<String> permissions;
 
@@ -32,11 +38,12 @@ public class SecurityUser implements UserDetails {
     }
 
     /**
-     * Not used — authentication is JWT-based, no password stored here.
+     * Returns the BCrypt-hashed password for credential-based login.
+     * Populate this field when building a {@link SecurityUser} for email/password auth.
      */
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     /**
